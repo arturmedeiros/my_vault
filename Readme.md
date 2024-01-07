@@ -40,8 +40,8 @@ cd .. && bash <(curl -s "https://raw.githubusercontent.com/arturmedeiros/my_vaul
     && docker exec vault_backend php artisan key:generate --force \
     && docker exec vault_backend php artisan jwt:secret --force \
     && docker exec vault_backend php artisan storage:link \
-    && docker exec vault_backend php artisan queue:table \
     && docker exec vault_backend php artisan migrate --seed --force \
+    && docker exec vault_backend php artisan queue:table \
     && docker exec vault_frontend yarn install \
     && docker exec vault_frontend quasar build -m spa
 ```
