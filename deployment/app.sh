@@ -247,6 +247,7 @@ docker exec vault_backend composer install \
     && docker exec vault_backend php artisan storage:link \
     && docker exec vault_backend php artisan queue:table \
     && docker exec vault_backend php artisan migrate --seed --force \
+    && docker exec vault_frontend yarn install \
     && docker exec vault_frontend quasar build -m spa
 
 echo "✅  Etapa concluída!"
