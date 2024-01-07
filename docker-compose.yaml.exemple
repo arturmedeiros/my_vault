@@ -1,0 +1,85 @@
+version: '3.9'
+
+networks:
+  vault_network:
+    driver: bridge
+
+services:
+  vault_backend:
+    image: vault_backend:0.1
+    container_name: vault_backend
+    restart: always
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ./backend:/backend
+    depends_on:
+      - vault_database
+    networks:
+      - vault_network
+
+  vault_frontend:
+    image: vault_frontend:0.1
+    container_name: vault_frontend
+    restart: always
+    stdin_open: true
+    tty: true
+    build:
+      context: .
+      dockerfile: docker/nodejs/Dockerfile
+    volumes:
+      - ./frontend:/app
+    networks:
+      - vault_network
+
+  vault_nginx:
+    image: nginx:latest
+    container_name: vault_nginx
+    restart: unless-stopped
+    volumes:
+      - ./docker/nginx:/etc/nginx/conf.d
+    ports:
+      - 8000:80
+      - 3000:4000
+    networks:
+      - vault_network
+    depends_on:
+      - vault_backend
+      - vault_frontend
+
+  vault_database:
+    image: mariadb:10.7
+    container_name: vault_database
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: vault_pass
+      MYSQL_DATABASE: vault
+      MYSQL_USER: vault
+      MYSQL_PASSWORD: vault_pass
+    ports:
+      - 33061:80
+    volumes:
+      - ./database/mysql:/var/lib/mysql
+    networks:
+      - vault_network
+
+  vault_phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: vault_phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: vault_database
+      PMA_PORT: 3306
+      PMA_CONTROLHOST: vault_database
+      PMA_CONTROLPORT: 3306
+      PMA_ARBITRARY: 1
+      PMA_SERVERNAME: 0
+    volumes:
+      - ./docker/php/custom.ini:/usr/local/etc/php/conf.d/uploads.ini
+    ports:
+      - 8888:80
+    depends_on:
+      - vault_database
+    networks:
+      - vault_network
