@@ -62,6 +62,12 @@ class PasswordController extends Controller
                 $data['pass'] = CryptoService::encryptPassword($data['pass'], HelperClass::getAppKey());
             }
 
+            if ($request->has('link') && $request->input('link')) {
+                $data['preferences'] = [
+                    'link' => $data['link']
+                ];
+            }
+
             $password = $this->password->create($data);
 
             return response()->json($password, 201); // 201 Created status code.
@@ -122,6 +128,12 @@ class PasswordController extends Controller
 
         if ($request->has('pass') && $request->input('pass')) {
             $data['pass'] = CryptoService::encryptPassword($data['pass'], HelperClass::getAppKey());
+        }
+
+        if ($request->has('link') && $request->input('link')) {
+            // $password['preferences']['link'] = $data['link'];
+            $data['preferences'] = $password['preferences'];
+            $data['preferences']['link'] = $request['link'];
         }
 
         $password->update($data);
