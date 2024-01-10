@@ -22,71 +22,72 @@
                     </tr>
                     </thead>
 
-                    <tbody>
-                    <tr class="cursor-pointer" v-for="item in passwords.data.data" :key="item">
-                        <td class="text-left">
-                            {{ item.name }}
-                        </td>
-                        <td class="text-center">
-                            {{ item.login }}
-                        </td>
-                        <td class="text-center">
-                            {{ item.description }}
-                        </td>
-                        <td class="text-center">
-                            <q-badge :color="checkLevel(item.pass_level).color" rounded>
-                                {{ checkLevel(item.pass_level).text }}
-                            </q-badge>
-                        </td>
-                        <td class="text-center">
-                            {{ item.created_date }} às {{ item.created_time }}
-                        </td>
-                        <td v-if="false" class="text-center">
-                            <div v-if="item.roles && item.roles.length > 0">
-                                <q-badge v-for="group in roleGroups(item.roles)"
-                                         :key="group"
-                                         color="primary"
-                                         bordered
-                                         rounded>
-                                    {{ group }}
+                    <tbody v-for="item in passwords.data.data" :key="item">
+                        <tr class="cursor-pointer"
+                            @click="setData(item)">
+                            <td class="text-left">
+                                {{ item.name }}
+                            </td>
+                            <td class="text-center">
+                                {{ item.login }}
+                            </td>
+                            <td class="text-center">
+                                {{ item.description }}
+                            </td>
+                            <td class="text-center">
+                                <q-badge :color="checkLevel(item.pass_level).color" rounded>
+                                    {{ checkLevel(item.pass_level).text }}
                                 </q-badge>
-                            </div>
-                            <div v-else>
-                                Nenhum
-                            </div>
-                        </td>
-                        <!-- Actions -->
-                        <td v-if="false" class="text-center">
-                            <div>
-                                <div class="row justify-center">
-                                    <q-list>
-                                        <q-item class="q-pa-none">
-                                            <div class="text-grey-8 q-gutter-xs q-pr-none self-center">
-                                                <q-btn @click.stop
-                                                       v-if="true"
-                                                       color="grey-7"
-                                                       class=""
-                                                       size="12px"
-                                                       round
-                                                       flat
-                                                       icon="edit">
-                                                    <q-tooltip>Editar</q-tooltip>
-                                                </q-btn>
-                                                <q-btn color="grey-7"
-                                                       class=""
-                                                       size="12px"
-                                                       round
-                                                       flat
-                                                       icon="delete">
-                                                    <q-tooltip>Excluir</q-tooltip>
-                                                </q-btn>
-                                            </div>
-                                        </q-item>
-                                    </q-list>
+                            </td>
+                            <td class="text-center">
+                                {{ item.created_date }} às {{ item.created_time }}
+                            </td>
+                            <td v-if="false" class="text-center">
+                                <div v-if="item.roles && item.roles.length > 0">
+                                    <q-badge v-for="group in roleGroups(item.roles)"
+                                             :key="group"
+                                             color="primary"
+                                             bordered
+                                             rounded>
+                                        {{ group }}
+                                    </q-badge>
                                 </div>
-                            </div>
-                        </td>
-                    </tr>
+                                <div v-else>
+                                    Nenhum
+                                </div>
+                            </td>
+                            <!-- Actions -->
+                            <td v-if="false" class="text-center">
+                                <div>
+                                    <div class="row justify-center">
+                                        <q-list>
+                                            <q-item class="q-pa-none">
+                                                <div class="text-grey-8 q-gutter-xs q-pr-none self-center">
+                                                    <q-btn @click.stop
+                                                           v-if="true"
+                                                           color="grey-7"
+                                                           class=""
+                                                           size="12px"
+                                                           round
+                                                           flat
+                                                           icon="edit">
+                                                        <q-tooltip>Editar</q-tooltip>
+                                                    </q-btn>
+                                                    <q-btn color="grey-7"
+                                                           class=""
+                                                           size="12px"
+                                                           round
+                                                           flat
+                                                           icon="delete">
+                                                        <q-tooltip>Excluir</q-tooltip>
+                                                    </q-btn>
+                                                </div>
+                                            </q-item>
+                                        </q-list>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
                     </tbody>
                 </q-markup-table>
 
@@ -158,6 +159,13 @@ export default {
                 return list;
             } else {
                 return [];
+            }
+        },
+        setData(data) {
+            this.$store.commit('SET_PASS', data)
+            console.log("data", this.passwords.password)
+            if (this.passwords.password) {
+                this.setModal({ key: 'pass_modal', state: true })
             }
         }
     },

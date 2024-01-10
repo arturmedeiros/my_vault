@@ -114,7 +114,7 @@ export default {
     },
     watch: {},
     mounted() {
-        this.myUser = this.xeroxHelper(this.me.user)
+        this.myUser = this.removeBindHelper(this.me.user)
     },
     methods: {
         update() {
@@ -126,11 +126,11 @@ export default {
             }
 
             if (this.pass && this.pass !== '' && this.pass !== undefined) {
-                user.password = this.xeroxHelper(this.pass)
+                user.password = this.removeBindHelper(this.pass)
             }
 
             user.app_url = this.app_config.app_url;
-            this.$store.dispatch('updateUser', this.xeroxHelper(user))
+            this.$store.dispatch('updateUser', this.removeBindHelper(user))
 
             this.$q.notify({
                 message: `Seus dados foram editados!`,

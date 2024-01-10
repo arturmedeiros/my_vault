@@ -1,12 +1,12 @@
 <template>
     <q-dialog
-        v-model="configs.modals.vault_modal"
+        v-model="configs.modals.pass_modal"
         persistent
         :maximized="($q.screen.xs || $q.screen.sm)"
         transition-show="slide-up"
         transition-hide="slide-down"
     >
-        <q-card  :style="($q.screen.xs || $q.screen.sm) ? '' : 'min-width: 600px; border-radius: 15px;'">
+        <q-card :style="($q.screen.xs || $q.screen.sm) ? '' : 'min-width: 600px; border-radius: 15px;'">
             <!-- Navbar -->
             <q-toolbar class="q-px-lg" style="height: 65px;">
                 <q-avatar v-if="true" square>
@@ -23,7 +23,7 @@
                        flat
                        rounded
                        icon="close"
-                       @click="setModal({ key: 'vault_modal', state: false })">
+                       @click="setModal({ key: 'pass_modal', state: false })">
                 </q-btn>
             </q-toolbar>
             <q-separator></q-separator>
@@ -87,13 +87,13 @@
                         </div>
                         <div :class="($q.screen.xs || $q.screen.sm) ? '' : 'q-px-md'"
                              class="col-md-12 col-sm-12 col-xs-12 q-pb-sm cursor-default">
-                          <q-input rounded
-                                   color="primary"
-                                   class="bg-white q-px-none q-pb-md"
-                                   placeholder="Descreva sua finalidade..."
-                                   label="Descrição"
-                                   v-model="password.description"
-                          />
+                            <q-input rounded
+                                     color="primary"
+                                     class="bg-white q-px-none q-pb-md"
+                                     placeholder="Descreva sua finalidade..."
+                                     label="Descrição"
+                                     v-model="password.description"
+                            />
                         </div>
                         <div :class="($q.screen.xs || $q.screen.sm) ? '' : 'q-px-md'"
                              class="col-md-6 col-sm-12 col-xs-12 q-pb-sm cursor-default">
@@ -114,13 +114,14 @@
                                      v-model="password.pass"
                             >
                                 <template v-slot:append>
-                                    <span @click="generateSecPass()"
-                                          class="cursor-pointer text-grey-7 q-pr-xs" style="font-size: .9rem;">Gerar</span>
-                                    <q-icon name="refresh"
-                                            size="xs"
-                                            class="cursor-pointer q-pr-sm cursor-pointer"
-                                            @click="generateSecPass()"
-                                    />
+                                    <div @click="generateSecPass()">
+                                        <span class="cursor-pointer text-grey-7 q-pr-xs"
+                                              style="font-size: .9rem;">Gerar</span>
+                                        <q-icon name="refresh"
+                                                size="xs"
+                                                class="cursor-pointer q-pr-sm cursor-pointer"
+                                        />
+                                    </div>
                                 </template>
                             </q-input>
                         </div>
@@ -129,13 +130,13 @@
             </q-card-section>
             <ModalActionsFooter>
                 <template v-slot:ModalCTALeft>
-                    <ModalFullCTALeft @click="setModal({ key: 'vault_modal', state: false })"
+                    <ModalFullCTALeft @click="setModal({ key: 'pass_modal', state: false })"
                                       text="Cancelar"
                                       color="primary"
                     />
                 </template>
                 <template v-slot:ModalCTARight>
-                    <ModalFullCTARight @click="setModal({ key: 'vault_modal', state: false })"
+                    <ModalFullCTARight @click="savePassword()"
                                        text="Salvar"
                                        color="primary"
                     />
@@ -151,7 +152,7 @@ import ModalFullCTALeft from "components/general/ModalFullCTALeft.vue";
 import ModalFullCTARight from "components/general/ModalFullCTARight.vue";
 
 export default {
-    name: "ModalVaultManagement",
+    name: "ModalPassManagement",
     components: {
         ModalFullCTARight,
         ModalFullCTALeft,
@@ -164,50 +165,80 @@ export default {
             pass_link: null,
         }
     },
-  mounted() {
-      if (!this.type && this.getTypesList.length > 0) {
-        this.type = this.getTypesList[0]
-      }
-  },
-  watch: {
-      'getTypesList': function () {
+    mounted() {
         if (!this.type && this.getTypesList.length > 0) {
-          this.type = this.getTypesList[0]
+            this.type = this.getTypesList[0]
         }
-      },
-      // Limpa campos ao fechar modal
-      'configs.modals.vault_modal': function () {
-          if (!this.configs.modals.vault_modal) {
-              this.password = {}
-              this.pass_link = null
-              if (this.getTypesList.length > 0) {
-                  this.type = this.getTypesList[0]
-              }
-          }
-      },
-      'passwords.password': function () {
-        if (this.passwords.password && this.passwords.password.key) {
-          this.password = this.passwords.password
-        }
-      },
-      'type': function () {
-          if (this.passwords.password && this.passwords.password.key) {
-              this.passwords.password.type = this.type.value
-              console.log("Alterou tipo de senha para: " + this.type.name +' - '+ this.type.value)
-          }
-      },
-  },
+    },
+    watch: {
+        'getTypesList': function () {
+            if (!this.type && this.getTypesList.length > 0) {
+                this.type = this.getTypesList[0]
+            }
+        },
+        // Limpa campos ao fechar modal
+        'configs.modals.pass_modal': function () {
+            if (!this.configs.modals.pass_modal) {
+                this.password = {}
+                this.pass_link = null
+                if (this.getTypesList.length > 0) {
+                    this.type = this.getTypesList[0]
+                }
+            }
+        },
+        'passwords.password': function () {
+            if (this.passwords.password && this.passwords.password.key) {
+                let pass = this.removeBindHelper(this.passwords.password);
+                this.password = pass
+                this.pass_link = pass.link
+                this.type = pass.type
+            }
+        },
+    },
     methods: {
-        generateSecPass(size = 12) {
-            const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
-            let pass = "";
-
-            for (let i = 0; i < size; i++) {
-                const indices = Math.floor(Math.random() * characters.length);
-                pass += characters.charAt(indices);
+        generateSecPass() {
+            this.password.pass = this.generateSecPassword(12);
+        },
+        savePassword() {
+            if (!this.password.name || this.password.name.length < 1) {
+                alert("Digite um nome válido!")
+                return false;
             }
 
-            this.password.pass = pass;
+            if (!this.password.pass || this.password.pass < 1) {
+                alert("Digite uma senha válida!")
+                return false;
+            }
+
+            if (!this.type.value || this.type.value < 1) {
+                alert("Escolha um tipo de senha.")
+                return false;
+            }
+
+            if (this.password.name &&
+                this.password.pass &&
+                this.type.value) {
+
+                let payload = {
+                    "name"       : this.password.name,
+                    "pass"       : this.password.pass,
+                    "description": this.password.description ? this.password.description : null,
+                    "login"      : this.password.login ? this.password.login : null,
+                    "link"       : this.pass_link,
+                    "type_key"   : this.type.value,
+                }
+
+                // Cria ou Atualiza registro
+                if (!this.password.key) {
+                    this.$store.dispatch('storePassword', payload)
+                } else {
+                    payload.key = this.password.key
+                    this.$store.dispatch('putPassword', payload)
+                }
+
+                // Fecha modal
+                this.setModal({ key: 'pass_modal', state: false })
+            }
         }
     }
 }

@@ -3,11 +3,10 @@ import {mapActions, mapGetters, mapState} from 'vuex'
 import no_pic from "assets/images/no-pic.png"
 import no_pic_user from "assets/images/no-pic-user.png"
 import {copyToClipboard, useQuasar} from 'quasar'
-import passwords from "src/store/modules/passwords";
-import roles from "src/store/modules/roles";
-import roles_users from "src/store/modules/roles_users";
-import users from "src/store/modules/users";
-import types from "src/store/modules/types";
+
+const BaseUrl = process.env.BASE_URL ? process.env.BASE_URL : 'localhost'
+
+console.log('BaseUrl', process.env.BASE_URL);
 
 const PROD = ![
     '192.168.15',
@@ -66,8 +65,8 @@ export default async ({app}) => {
                 toTop: 0,
                 app_config: {
                     app_url: PROD
-                        ? 'http://127.0.0.1:8000/api/v1'
-                        : 'http://127.0.0.1:8000/api/v1',
+                        ? `${BaseUrl}/api/v1`
+                        : `${BaseUrl}/api/v1`
                 },
                 drawer: true,
             }
@@ -87,7 +86,7 @@ export default async ({app}) => {
             }
         },
         methods: {
-            xeroxHelper(payload) {
+            removeBindHelper(payload) {
                 return JSON.parse(JSON.stringify(payload))
             },
             refresh() {
@@ -150,6 +149,17 @@ export default async ({app}) => {
             },
             goToRoute(routeName) {
                 this.$router.push({name: routeName})
+            },
+            generateSecPassword(size = 12) {
+                const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
+                let pass = "";
+
+                for (let i = 0; i < size; i++) {
+                    const indices = Math.floor(Math.random() * characters.length);
+                    pass += characters.charAt(indices);
+                }
+
+                return pass;
             }
         },
         watch: {

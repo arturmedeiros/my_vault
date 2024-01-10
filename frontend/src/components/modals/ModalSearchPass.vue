@@ -1,5 +1,5 @@
 <template>
-    <q-dialog v-model="configs.modals.search_pass"
+    <q-dialog v-model="configs.modals.pass_search"
               persistent
               transition-show="fadeIn"
               transition-hide="fadeIn">
@@ -22,7 +22,7 @@
                      outline
                      style="font-weight: 600;"
                      class="shadow-0"
-                     @click="setModal({ key: 'search_pass', status: false })"
+                     @click="setModal({ key: 'pass_search', status: false })"
                      color="primary">
                 <q-item-label class="q-px-sm">
                   <span class="" style="">Cancelar</span>

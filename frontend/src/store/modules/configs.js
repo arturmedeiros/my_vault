@@ -16,7 +16,8 @@ const configs = {
             maximizedToggle: true,
             vault_modal: false,
             alert: false,
-            search_pass: false,
+            pass_search: false,
+            pass_modal: false,
         },
         modal_content: {
             alert: {
@@ -55,7 +56,7 @@ const configs = {
         setLoadDataApi(context) {
             context.commit("SET_LOADING", true)
             this.dispatch('getMe', {app_url: window.localStorage.getItem('app_url')})
-            this.dispatch('setPasswordsData')
+            this.dispatch('getPasswordsData')
             this.dispatch('setRolesData')
             this.dispatch('setRolesUsersData')
             this.dispatch('setUsersData')

@@ -10,11 +10,11 @@
             <Breadcrumbs :cta="true">
                 <template v-slot:cta>
                     <BreadcrumbCTALeft
-                        @click="setModal({ key: 'vault_modal', state: true })"
+                        @click="setModal({ key: 'pass_modal', state: true })"
                         icon="add"
                         text="Nova Senha"/>
                     <BreadcrumbCTARight
-                        @click="setModal({ key: 'search_pass', state: true })"
+                        @click="setModal({ key: 'pass_search', state: true })"
                         icon="search"
                         text="Procurar"/>
                 </template>
@@ -45,14 +45,14 @@
         </div>
 
         <!-- Modals -->
-        <ModalVaultManagement/>
+        <ModalPassManagement/>
         <ModalSearchPass/>
     </q-page>
 </template>
 
 <script>
 import Breadcrumbs from "components/general/Breadcrumbs.vue";
-import ModalVaultManagement from "components/modals/ModalVaultManagement.vue";
+import ModalPassManagement from "components/modals/ModalPassManagement.vue";
 import TablePasswords from "components/general/TablePasswords.vue";
 import BreadcrumbCTALeft from "components/general/BreadcrumbCTALeft.vue";
 import BreadcrumbCTARight from "components/general/BreadcrumbCTARight.vue";
@@ -65,7 +65,7 @@ export default {
         BreadcrumbCTARight,
         BreadcrumbCTALeft,
         TablePasswords,
-        ModalVaultManagement,
+        ModalPassManagement,
         Breadcrumbs
     },
     data() {
