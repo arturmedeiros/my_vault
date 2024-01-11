@@ -5,8 +5,7 @@ import no_pic_user from "assets/images/no-pic-user.png"
 import {copyToClipboard, useQuasar} from 'quasar'
 
 const BaseUrl = process.env.BASE_URL ? process.env.BASE_URL : 'localhost'
-
-console.log('BaseUrl', process.env.BASE_URL);
+//console.log('BaseUrl', process.env.BASE_URL);
 
 const PROD = ![
     '192.168.15',
@@ -115,7 +114,7 @@ export default async ({app}) => {
                     this.$store.commit('SET_MODAL', modalKey)
                 }
             },
-            copy(text) {
+            copyPass(text) {
                 copyToClipboard(text)
                     .then(() => {
                         this.$q.notify({
@@ -123,7 +122,8 @@ export default async ({app}) => {
                             color: 'white',
                             textColor: 'grey-9',
                             position: 'bottom-right',
-                            icon: 'announcement',
+                            icon: 'task_alt',
+                            iconColor: 'green-8',
                             classes: 'border-radius-15',
                             actions: [
                                 {

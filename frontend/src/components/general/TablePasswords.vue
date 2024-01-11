@@ -1,10 +1,10 @@
 <template>
     <div>
         <!-- Loader -->
-        <Loading v-show="configs.loading" height="300px"/>
+        <Loading v-show="configs.loading_table" height="300px"/>
 
         <!-- Content -->
-        <div v-show="!configs.loading">
+        <div v-show="!configs.loading_table">
 
             <!-- Table -->
             <div v-if="passwords && passwords.data.total > 0">
@@ -13,81 +13,111 @@
                     <tr>
                         <th class="text-left">Nome</th>
                         <th class="text-center">Login</th>
-                        <th class="text-center">Descrição</th>
                         <th class="text-center">Segurança</th>
                         <th class="text-center">Data de Criação</th>
-                        <th v-if="false" class="text-center">Grupos</th>
+                        <th v-if="true" class="text-center">Grupos</th>
                         <!-- Actions -->
-                        <th v-if="false" class="text-center">Ações</th>
+                        <th v-if="true" class="text-center">Ações</th>
                     </tr>
                     </thead>
-
-                    <tbody v-for="item in passwords.data.data" :key="item">
-                        <tr class="cursor-pointer"
-                            @click="setData(item)">
-                            <td class="text-left">
-                                {{ item.name }}
-                            </td>
-                            <td class="text-center">
-                                {{ item.login }}
-                            </td>
-                            <td class="text-center">
-                                {{ item.description }}
-                            </td>
-                            <td class="text-center">
-                                <q-badge :color="checkLevel(item.pass_level).color" rounded>
-                                    {{ checkLevel(item.pass_level).text }}
-                                </q-badge>
-                            </td>
-                            <td class="text-center">
-                                {{ item.created_date }} às {{ item.created_time }}
-                            </td>
-                            <td v-if="false" class="text-center">
-                                <div v-if="item.roles && item.roles.length > 0">
-                                    <q-badge v-for="group in roleGroups(item.roles)"
-                                             :key="group"
-                                             color="primary"
-                                             bordered
-                                             rounded>
-                                        {{ group }}
+                    <tbody>
+                        <template v-for="(item) in passwords.data.data" :key="item">
+                            <tr class="cursor-pointer"
+                                @click="setData(item)">
+                                <td class="text-left">
+                                    <q-item class="cursor-pointer q-pl-sm q-pr-none">
+                                        <q-item-section class="q-pr-lg" avatar>
+                                            <q-btn
+                                                round
+                                                unelevated
+                                                text-color="white"
+                                                class="bg-menu">
+                                                <q-icon size="20px"
+                                                        v-if="item.type && item.type.preferences && item.type.preferences.icon"
+                                                        :name="item.type.preferences.icon"/>
+                                                <q-tooltip v-if="!($q.screen.xs || $q.screen.sm) && item.type && item.type.preferences && item.type.preferences.icon"
+                                                           class="bg-primary text-white">
+                                                    {{ item.type.name }}
+                                                </q-tooltip>
+                                            </q-btn>
+                                        </q-item-section>
+                                        <q-item-section center>
+                                            <q-item-label lines="1"
+                                                          style="font-size: 1.1rem; font-weight: 500;"
+                                                          class="text-weight-bold">
+                                                {{ item.name }}
+                                            </q-item-label>
+                                            <q-item-label lines="1">
+                                                {{ item.description }}
+                                            </q-item-label>
+                                        </q-item-section>
+                                    </q-item>
+                                </td>
+                                <td class="text-center">
+                                    <span v-if="item.login">{{ item.login }}</span>
+                                    <q-icon v-else color="grey-5" size="18px" name="highlight_off"/>
+                                </td>
+                                <td class="text-center">
+                                    <q-badge :color="checkLevel(item.pass_level).color" rounded>
+                                        {{ checkLevel(item.pass_level).text }}
                                     </q-badge>
-                                </div>
-                                <div v-else>
-                                    Nenhum
-                                </div>
-                            </td>
-                            <!-- Actions -->
-                            <td v-if="false" class="text-center">
-                                <div>
-                                    <div class="row justify-center">
-                                        <q-list>
-                                            <q-item class="q-pa-none">
-                                                <div class="text-grey-8 q-gutter-xs q-pr-none self-center">
-                                                    <q-btn @click.stop
-                                                           v-if="true"
-                                                           color="grey-7"
-                                                           class=""
-                                                           size="12px"
-                                                           round
-                                                           flat
-                                                           icon="edit">
-                                                        <q-tooltip>Editar</q-tooltip>
-                                                    </q-btn>
-                                                    <q-btn color="grey-7"
-                                                           class=""
-                                                           size="12px"
-                                                           round
-                                                           flat
-                                                           icon="delete">
-                                                        <q-tooltip>Excluir</q-tooltip>
-                                                    </q-btn>
-                                                </div>
-                                            </q-item>
-                                        </q-list>
+                                </td>
+                                <td class="text-center">
+                                    {{ item.created_date }} às {{ item.created_time }}
+                                </td>
+                                <td v-if="true" class="text-center">
+                                    <div v-if="item.roles && item.roles.length > 0">
+                                        <q-badge v-for="group in roleGroups(item.roles)"
+                                                 :key="group"
+                                                 color="primary"
+                                                 bordered
+                                                 rounded>
+                                            {{ group }}
+                                        </q-badge>
                                     </div>
-                                </div>
-                            </td>
-                        </tr>
+                                    <div v-else>
+                                        Nenhum
+                                    </div>
+                                </td>
+                                <!-- Actions -->
+                                <td v-if="true" class="text-center">
+                                    <div>
+                                        <div class="row justify-center">
+                                            <q-list>
+                                                <q-item class="q-pa-none">
+                                                    <div class="text-grey-8 q-gutter-xs q-pr-none self-center">
+                                                        <q-btn @click.stop="copyPass(item.pass_decrypt)"
+                                                               v-if="true"
+                                                               color="grey-7"
+                                                               class=""
+                                                               size="12px"
+                                                               round
+                                                               flat
+                                                               icon="copy_all">
+                                                            <q-tooltip v-if="!($q.screen.xs || $q.screen.sm)">
+                                                                Copiar
+                                                            </q-tooltip>
+                                                        </q-btn>
+                                                        <q-btn @click.stop="openUrl(item.preferences.link)"
+                                                               v-if="item.preferences && item.preferences.link"
+                                                               color="grey-7"
+                                                               class=""
+                                                               size="12px"
+                                                               round
+                                                               flat
+                                                               icon="open_in_new">
+                                                            <q-tooltip v-if="!($q.screen.xs || $q.screen.sm)">
+                                                                Abrir link
+                                                            </q-tooltip>
+                                                        </q-btn>
+                                                    </div>
+                                                </q-item>
+                                            </q-list>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
                     </tbody>
                 </q-markup-table>
 
@@ -124,13 +154,8 @@ export default {
     data() {
         return {}
     },
-    mounted() {
-        this.loadResources()
-    },
+    mounted() {},
     methods: {
-        loadResources() {
-            //this.$store.dispatch('setPasswordsData')
-        },
         checkLevel(level) {
             if (level === 3 || level === '3') {
                 return {
@@ -163,7 +188,6 @@ export default {
         },
         setData(data) {
             this.$store.commit('SET_PASS', data)
-            console.log("data", this.passwords.password)
             if (this.passwords.password) {
                 this.setModal({ key: 'pass_modal', state: true })
             }

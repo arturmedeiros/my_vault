@@ -25,14 +25,14 @@ export default {
     props: ['data', 'commit'],
     watch: {
         'page': function () {
-            this.$store.commit('SET_LOADING', true)
+            this.$store.commit('SET_LOADING_TABLE', true)
             let getUrl = `${this.data.path}?page=${this.page}`;
             api.get(getUrl).then(response => {
                 this.$store.commit(this.commit, response.data)
-                this.$store.commit('SET_LOADING', false)
+                this.$store.commit('SET_LOADING_TABLE', false)
             }).catch(error => {
                 console.log(error);
-                this.$store.commit('SET_LOADING', false)
+                this.$store.commit('SET_LOADING_TABLE', false)
             });
         }
     },

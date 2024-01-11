@@ -5,6 +5,7 @@ const configs = {
         app_version: '0.0.1',
         loaded: false,
         loading: false,
+        loading_table: false,
         scroll_position: 0,
         scroll_breakpoint: 285,
         scroll_breakpoint_desk: 355,
@@ -30,6 +31,9 @@ const configs = {
     mutations: {
         SET_LOADING(state, payload) {
             state.loading = payload
+        },
+        SET_LOADING_TABLE(state, payload) {
+            state.loading_table = payload
         },
 
         SET_LOADED(state, payload) {

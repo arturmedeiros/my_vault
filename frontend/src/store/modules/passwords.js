@@ -39,6 +39,7 @@ const passwords = {
             api.get(`/vault/pass`).then(response => {
                 context.commit("SET_PASS_DATA", response.data)
                 context.commit("SET_PASS_LOADED", true)
+                context.commit('SET_LOADING_TABLE', false)
             }).catch(error => {
                 if (error.response && error.response.status === 401) {
                     this.dispatch('logoutUser');
@@ -64,7 +65,17 @@ const passwords = {
             });
         },
         putPassword(context, payload) {
+            context.commit('SET_LOADING_TABLE', false)
             api.put(`/vault/pass/${payload.key}`, payload).then(response => {
+                this.dispatch("getPasswordsData");
+            }).catch(error => {
+                if (error.response && error.response.status === 401) {
+                    this.dispatch('logoutUser');
+                }
+            });
+        },
+        deletePassword(context, payload) {
+            api.delete(`/vault/pass/${payload.key}`).then(response => {
                 this.dispatch("getPasswordsData");
             }).catch(error => {
                 if (error.response && error.response.status === 401) {

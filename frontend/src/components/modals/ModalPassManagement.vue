@@ -130,13 +130,22 @@
             </q-card-section>
             <ModalActionsFooter>
                 <template v-slot:ModalCTALeft>
-                    <ModalFullCTALeft @click="setModal({ key: 'pass_modal', state: false })"
+                    <!-- Delete -->
+                    <ModalFullCTALeft v-if="password.key"
+                                      @click="remove()"
+                                      text="Excluir"
+                                      color="red"
+                    />
+                    <!-- Cancel -->
+                    <ModalFullCTALeft v-else
+                                      @click="setModal({ key: 'pass_modal', state: false })"
                                       text="Cancelar"
                                       color="primary"
                     />
                 </template>
                 <template v-slot:ModalCTARight>
-                    <ModalFullCTARight @click="savePassword()"
+                    <!-- Save -->
+                    <ModalFullCTARight @click="save()"
                                        text="Salvar"
                                        color="primary"
                     />
@@ -199,7 +208,7 @@ export default {
         generateSecPass() {
             this.password.pass = this.generateSecPassword(12);
         },
-        savePassword() {
+        save() {
             if (!this.password.name || this.password.name.length < 1) {
                 alert("Digite um nome válido!")
                 return false;
@@ -239,11 +248,55 @@ export default {
                 // Fecha modal
                 this.setModal({ key: 'pass_modal', state: false })
             }
-        }
+        },
+        remove() {
+            // Fecha modal
+            this.setModal({ key: 'pass_modal', state: false })
+            // Confirma remoção
+            this.removeConfirm(this.password)
+        },
+        removeConfirm(item){
+            this.$q.notify({
+                message: 'Tem certeza que deseja remover esse registro? Essa ação é irreversível.',
+                color: 'negative',
+                //textColor: 'grey-9',
+                position: 'bottom',
+                icon: 'help',
+                iconColor: '#f20000',
+                classes: 'border-radius-15 shadow-0',
+                group: false,
+                progress: true,
+                multiLine: true,
+                timeout: 7000,
+                progressClass: 'progress-confirm-del',
+                actions: [
+                    {
+                        label: 'Não excluir',
+                        //icon: 'close',
+                        size: 'xs',
+                        color: 'white',
+                        handler: () => {}
+                    },
+                    {
+                        label: 'Excluir!',
+                        icon: 'delete',
+                        size: 'xs',
+                        color: 'white',
+                        handler: () => {
+                            this.$store.dispatch('deletePassword', this.removeBindHelper(item))
+                        }
+                    },
+                ],
+            })
+        },
     }
 }
 </script>
 
-<style scoped>
-
+<style>
+    .progress-confirm-del {
+        opacity: 0.7;
+        color: white;
+        background: white;
+    }
 </style>

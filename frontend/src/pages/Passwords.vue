@@ -71,8 +71,7 @@ export default {
     data() {
         return {}
     },
-    mounted() {
-    },
+    mounted() {},
     methods: {},
 }
 </script>
