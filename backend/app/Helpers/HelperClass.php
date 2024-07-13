@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Models\Role;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use Mockery\Exception;
 
@@ -10,7 +11,7 @@ class HelperClass
 {
     public string $appVersion = '0.0.1';
 
-    public function checkAPIStatus(): \Illuminate\Http\JsonResponse
+    public function checkAPIStatus(): JsonResponse
     {
         return response()->json([
             'status_code' => 200,

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Helpers\HelperClass;
+use App\Services\RoleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
@@ -35,15 +36,12 @@ class AuthController extends Controller
         return $this->respondWithToken($token);
     }
 
-    /**
-     * Get the authenticated User.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function me()
+    public function me(): JsonResponse
     {
         $user = auth()->user();
         $user['is_admin'] = HelperClass::isAdmin(auth()->user()['roles']);
+        $user->roles = (new RoleService())->rolesFormatted($user->roles);
+
         return response()->json($user);
     }
 
@@ -81,7 +79,7 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
+            'expires_in' => auth()->factory()->getTTL() * /*60*/ 1440
         ]);
     }
 }

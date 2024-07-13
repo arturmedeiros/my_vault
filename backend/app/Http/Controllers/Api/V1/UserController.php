@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api\V1;
 use App\Helpers\HelperClass;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\RoleService;
 use Exception;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -25,23 +25,34 @@ class UserController extends Controller
     {
         // Apenas admin pode vizualisar todos os usuários.
         $isAdmin = HelperClass::isAdmin(auth()->user()['roles']);
-        if(!$isAdmin) {
-            $users = $this->user
-                ->with(['roles'])
-                ->where('uuid', '=', auth()->user()['uuid'])
-                ->first();
-        }
-        else {
+        if($isAdmin) {
             $users = $this->user
                 ->with(['roles'])
                 ->orderBy('id', 'DESC')
                 ->paginate(10);
+
+            $usersDataFormatted = [];
+            foreach ($users->items() as $user) {
+                $user->roles = (new RoleService())->rolesFormatted($user->roles);
+                $usersDataFormatted[] = $user;
+            }
+
+            // Insere novo valor para a chave "data" (com as permissões do usuário formatadas).
+            $users->appends('data', $usersDataFormatted);
+        } else {
+            // Usuários vêem apenas as próprias informações.
+            $users = $this->user
+                ->with(['roles'])
+                ->where('uuid', '=', auth()->user()['uuid'])
+                ->first();
+            // Formata as permissões do usuário.
+            $users->roles = (new RoleService())->rolesFormatted($users->roles);
         }
 
         return response()->json($users);
     }
 
-    public function store(FormRequest $request): JsonResponse
+    public function store(): JsonResponse
     {
         try {
             $isAdmin = HelperClass::isAdmin(auth()->user()['roles']);
@@ -49,10 +60,22 @@ class UserController extends Controller
                 return response()->json(['error' => 'Você não tem permissão para executar essa ação.'], 401);
             }
 
-            $data = $request->all();
+            $data = $this->request->all();
 
-            if ($request->has('password') && $request->input('password')) {
-                $data['password'] = bcrypt($request->input('password'));
+            if ($this->request->has('password') && $this->request->input('password')) {
+                $data['password'] = bcrypt($this->request->input('password'));
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Password is required.'
+                ], 400);
+            }
+
+            if (!$this->request->has('email') && !$this->request->input('email')) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Email is required.'
+                ], 400);
             }
 
             $user = $this->user->create($data);
@@ -68,10 +91,22 @@ class UserController extends Controller
 
     public function show($key): JsonResponse
     {
+        if (!$key && empty($this->request->input('key'))) {
+            return response()->json([
+                'success' => false,
+                'error' => 'User Key is required.'
+            ], 400);
+        }
+
+        $key = !$key && $this->request->input('key') ? $this->request->input('key') : $key;
+
         $user = $this->user
             ->with(['roles'])
             ->where('uuid', '=', $key)
             ->first();
+
+        // Formata as permissões do usuário.
+        $user->roles = (new RoleService())->rolesFormatted($user->roles);
 
         if (!isset($user)) {
             return response()->json(['error' => 'Usuário não encontrado.'], 404);
@@ -80,8 +115,17 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    public function update($key, FormRequest $request): JsonResponse
+    public function update(): JsonResponse
     {
+        if (empty($this->request->input('key'))) {
+            return response()->json([
+                'success' => false,
+                'error' => 'User Key is required.'
+            ], 400);
+        }
+
+        $key = $this->request->input('key');
+
         // Apenas admin pode editar outros usuários.
         $isAdmin = HelperClass::isAdmin(auth()->user()['roles']);
         if(!$isAdmin && auth()->user()['uuid'] !== $key) {
@@ -98,21 +142,35 @@ class UserController extends Controller
         }
 
         $modelAttributes = array_keys($user->getAttributes());
-        $data = $request->only($modelAttributes);
+        $data = $this->request->only($modelAttributes);
 
-        if ($request->has('password') && $request->input('password')) {
-            $data['password'] = bcrypt($request->input('password'));
+        if ($this->request->has('password') && $this->request->input('password')) {
+            $data['password'] = bcrypt($this->request->input('password'));
         }
 
         $user->update($data);
 
+        // Formata as permissões do usuário.
+        $user->roles = (new RoleService())->rolesFormatted($user->roles);
+
         return response()->json($user);
     }
 
-    public function destroy($key): JsonResponse
+    public function destroy(): JsonResponse
     {
+        if (empty($this->request->input('key'))) {
+            return response()->json([
+                'success' => false,
+                'error' => 'User Key is required.'
+            ], 400);
+        }
+
+        $key = $this->request->input('key');
+
         if(auth()->user()['uuid'] === $key) {
-            return response()->json(['error' => 'Você não pode remover o próprio usuário. Entre em contato com o administrador.'], 401);
+            return response()->json([
+                'error' => 'Você não pode remover o próprio usuário. Entre em contato com o administrador.'
+            ], 401);
         }
 
         // Apenas admin pode remover outros usuários.

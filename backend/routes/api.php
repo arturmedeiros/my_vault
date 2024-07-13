@@ -33,7 +33,11 @@ Route::group(['middleware' => 'auth:api'], function () {
         /* Admin */
         Route::prefix('admin')->name('api.v1.')->group(function () {
             /* Users */
-            Route::apiResource('users', UserController::class);
+            Route::apiResource('users', UserController::class)->except(['show', 'update', 'destroy']);
+            Route::get('users/{key}', [UserController::class, 'show'])->name('users.show');
+            Route::put('users', [UserController::class, 'update'])->name('users.update');
+            Route::delete('users', [UserController::class, 'destroy'])->name('users.destroy');
+
             /* Roles */
             Route::apiResource('roles', RoleController::class);
             Route::apiResource('role/user', RoleUserController::class)->except('index');
